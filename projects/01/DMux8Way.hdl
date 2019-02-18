@@ -17,4 +17,14 @@ CHIP DMux8Way {
 
     PARTS:
     // Put your code here:
+    DMux4Way(in=in,
+             sel=sel[1..2], // sel bit range is read left-to-right
+             a=dmuxab,
+             b=dmuxcd,
+             c=dmuxef,
+             d=dmuxgh);
+    DMux(in=dmuxab, sel=sel[0], a=a, b=b);
+    DMux(in=dmuxcd, sel=sel[0], a=c, b=d);
+    DMux(in=dmuxef, sel=sel[0], a=e, b=f);
+    DMux(in=dmuxgh, sel=sel[0], a=g, b=h);
 }

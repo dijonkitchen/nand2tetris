@@ -23,7 +23,7 @@ CHIP Mux8Way16 {
               b=b,
               c=c,
               d=d,
-              sel=sel[0..1],
+              sel=sel[0..1], // Mux sel bit range read right-to-left
               out=mux4way16abcdsel01);
     Mux4Way16(a=e,
               b=f,
