@@ -6,11 +6,11 @@
 /**
  * The HACK computer, including CPU, ROM and RAM.
  * When reset is 0, the program stored in the computer's ROM executes.
- * When reset is 1, the execution of the program restarts. 
+ * When reset is 1, the execution of the program restarts.
  * Thus, to start a program's execution, reset must be pushed "up" (1)
- * and "down" (0). From this point onward the user is at the mercy of 
- * the software. In particular, depending on the program's code, the 
- * screen may show some output and the user may be able to interact 
+ * and "down" (0). From this point onward the user is at the mercy of
+ * the software. In particular, depending on the program's code, the
+ * screen may show some output and the user may be able to interact
  * with the computer via the keyboard.
  */
 
@@ -20,4 +20,17 @@ CHIP Computer {
 
     PARTS:
     // Put your code here:
+    ROM32K(address=pcout,
+           out=instruction);
+    CPU(inM=memoryout, // M value input  (M = contents of RAM[A])
+        instruction=instruction, // Instruction for execution
+        reset=reset, // Signals whether to re-start the current
+        outM=outM,         // M value output
+        writeM=writeM,     // Write to M?
+        addressM=addressM, // Address in data memory (of M)
+        pc=pcout);         // address of next instruction
+    Memory(in=outM,
+           load=writeM,
+           address=addressM,
+           out=memoryout);
 }
