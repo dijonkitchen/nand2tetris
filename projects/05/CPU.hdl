@@ -61,7 +61,7 @@ CHIP CPU {
     Or(a=ainstruction,
        b=ALUtoAregister,
        out=loadA);
-    Register(in=Aregisterin,
+    ARegister(in=Aregisterin,
              load=loadA,
              out=Aregisterout);
     Or16(a=Aregisterout,
@@ -77,7 +77,7 @@ CHIP CPU {
         b=instruction[4],
         out=writeD);
 
-    Register(in=ALUout,
+    DRegister(in=ALUout,
              load=writeD,
              out=dregisterout);
     ALU(x=dregisterout,
