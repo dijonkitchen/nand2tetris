@@ -128,17 +128,22 @@ const readFile = (filePath) => {
 }
 
 const writeFile = (filePath, contents) => {
-  // write to standard out
-  console.log(contents)
-  return contents
+  fs.writeFile(filePath, contents, (err) => {
+    if (err) throw (err)
+  })
 }
 
 const main = async () => {
   const [filePath] = process.argv.slice(2, 3)
   const data = await readFile(filePath)
+
   const parsedLines = parseFile(data)
-  const parsedFile = parsedLines.join("\n")
-  writeFile(filePath, parsedFile)
+  const parsedFile = parsedLines.join("\n") + "\n"
+  const fileName = filePath
+                    .slice(0, filePath.length - 3)
+                    + "hack"
+
+  writeFile(fileName, parsedFile)
 }
 
 main();

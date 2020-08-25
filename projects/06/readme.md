@@ -15,5 +15,5 @@ in the same directory
 with binary machine code
 for a Hack computer:
 ```sh
-node [.asm file filePath]
+node hackssember.js [.asm file filePath]
 ```
