@@ -4,8 +4,7 @@ const fs = require('fs');
 const sanitizeLine = (line) => {
   const trimmedLine = line.trim()
   const sanitizedLine = trimmedLine
-                          .split(" ")
-                          .filter(line => line !== " ")
+                          .split(/\s+/)
                           .join()
 
   return sanitizedLine
