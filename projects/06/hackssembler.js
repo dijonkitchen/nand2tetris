@@ -4,6 +4,7 @@ const fs = require('fs');
 const sanitizeLine = (line) => {
   let trimmedLine = line
   const commentIndex = line.search(/\/\//)
+
   if (commentIndex != -1) {
     trimmedLine = trimmedLine.slice(0, commentIndex)
   }
@@ -80,7 +81,6 @@ let symbolsToAddress = {
   "KBD": 24576,
 }
 
-
 const addRegisters = (numberOfRegisters,
                       symbolTable) => {
   [...Array(numberOfRegisters).keys()].forEach(num => {
@@ -94,13 +94,14 @@ addRegisters(baseRegisters, symbolsToAddress)
 
 let nextAddress = baseRegisters
 
-const addSymbol = (symbol, symbolTable) => {
-  const address = symbolTable[symbol]
+const addVariable = (line, symbolTable) => {
+  const variableName = line.slice(1)
+  const address = symbolTable[variableName]
 
   if (address !== undefined) {
     return "@" + address
   } else {
-    symbolTable[symbol] = nextAddress
+    symbolTable[variableName] = nextAddress
     nextAddress++
 
     return "@" + (nextAddress - 1)
@@ -124,12 +125,6 @@ const resolveLabels = line => {
     addressCounter++
     return line
   }
-}
-
-const addVariable = (line, symbolTable) => {
-  const variableName = line.slice(1)
-
-  return addSymbol(variableName, symbolTable)
 }
 
 const aInstructionToBinary = (line) => {
