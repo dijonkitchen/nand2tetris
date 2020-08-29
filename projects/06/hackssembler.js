@@ -178,16 +178,14 @@ const resolveLineSymbols = (line) => {
 
 const parseFile = (fileData) => {
   const lines = fileData.split("\n")
-  const sanitizedLines = lines.map(line => sanitizeLine(line))
-  const nonEmptyLines = sanitizedLines.filter(line => line !== "")
-  const withLabelsResolved = nonEmptyLines.map(line => resolveLabels(line))
-  const parsedLines = withLabelsResolved
-                        .map(line => parseLine(line))
-                        .filter(line => line !== "")
+  const parsedLines = lines.map(line => sanitizeLine(line))
+                           .filter(line => line !== "")
+                           .map(line => resolveLabels(line))
+                           .map(line => parseLine(line))
+                           .filter(line => line !== "")
+                           .map(line => resolveLineSymbols(line))
 
-  const withSymbolsResolved = parsedLines.map(line => resolveLineSymbols(line))
-
-  return withSymbolsResolved
+  return parsedLines
 }
 
 const readFile = (filePath) => {
