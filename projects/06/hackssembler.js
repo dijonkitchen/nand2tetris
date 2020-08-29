@@ -2,21 +2,18 @@ const fs = require('fs');
 
 
 const sanitizeLine = (line) => {
-  const trimmedLine = line.trim()
+  let trimmedLine = line
+  const commentIndex = line.search(/\/\//)
+  if (commentIndex != -1) {
+    trimmedLine = trimmedLine.slice(0, commentIndex)
+  }
+  trimmedLine = trimmedLine.trim()
+
   const sanitizedLine = trimmedLine
                           .split(/\s+/)
                           .join()
 
   return sanitizedLine
-}
-
-const aInstructionToBinary = (line) => {
-  const decimalString = line.slice(1)
-  const binaryNumber = (decimalString >>> 0)
-                          .toString(2)
-                          .padStart(15, "0")
-
-  return "0" + binaryNumber
 }
 
 const compToBinary = {
@@ -73,6 +70,77 @@ const jumpToBinary = {
   "JMP": "111",
 }
 
+let symbolsToAddress = {
+  "SP": 0,
+  "LCL": 1,
+  "ARG": 2,
+  "THIS": 3,
+  "THAT": 4,
+  "SCREEN": 16384,
+  "KBD": 24576,
+}
+
+
+const addRegisters = (numberOfRegisters,
+                      symbolTable) => {
+  [...Array(numberOfRegisters).keys()].forEach(num => {
+    symbolTable["R"+num] = num
+  })
+}
+
+const baseRegisters = 16
+addRegisters(baseRegisters, symbolsToAddress)
+
+
+let nextAddress = baseRegisters
+
+const addSymbol = (symbol, symbolTable) => {
+  const address = symbolTable[symbol]
+
+  if (address !== undefined) {
+    return "@" + address
+  } else {
+    symbolTable[symbol] = nextAddress
+    nextAddress++
+
+    return "@" + (nextAddress - 1)
+  }
+}
+
+let addressCounter = 0
+
+const addLabel = (line, symbolTable) => {
+  const labelName = line.slice(1, line.length - 1)
+
+  symbolTable[labelName] = addressCounter
+
+  return "@" + addressCounter
+}
+
+const resolveLabels = line => {
+  if (/\(.+\)/.test(line)) {
+    return addLabel(line, symbolsToAddress)
+  } else {
+    addressCounter++
+    return line
+  }
+}
+
+const addVariable = (line, symbolTable) => {
+  const variableName = line.slice(1)
+
+  return addSymbol(variableName, symbolTable)
+}
+
+const aInstructionToBinary = (line) => {
+  const decimalString = line.slice(1)
+  const binaryNumber = (decimalString >>> 0)
+                          .toString(2)
+                          .padStart(15, "0")
+
+  return "0" + binaryNumber
+}
+
 const destCinstructionToBinary = (line) => {
   const [dest, comp] = line.split("=")
 
@@ -91,13 +159,11 @@ const jumpCinstructionToBinary = (line) => {
           + jumpToBinary[jump]
 }
 
-const parseLine = rawLine => {
-  const line = sanitizeLine(rawLine)
-
-  if (/^\/\//.test(line)) {
-    return ""
-  } else if (/@\d+/.test(line)) {
+const parseLine = line => {
+  if (/@\d+/.test(line)) {
     return aInstructionToBinary(line)
+  } else if (/@.+/.test(line)) {
+    return addVariable(line, symbolsToAddress)
   } else if (/=/.test(line)) {
     return destCinstructionToBinary(line)
   } else if (/;/.test(line)) {
@@ -107,12 +173,26 @@ const parseLine = rawLine => {
   }
 }
 
+const resolveLineSymbols = (line) => {
+  if (/@\d+/.test(line)) {
+    return aInstructionToBinary(line)
+  } else {
+    return line
+  }
+}
+
 const parseFile = (fileData) => {
   const lines = fileData.split("\n")
-  const parsedLines = lines.map(line => parseLine(line))
-  const nonEmptyLines = parsedLines.filter(line => line !== "")
+  const sanitizedLines = lines.map(line => sanitizeLine(line))
+  const nonEmptyLines = sanitizedLines.filter(line => line !== "")
+  const withLabelsResolved = nonEmptyLines.map(line => resolveLabels(line))
+  const parsedLines = nonEmptyLines
+                        .map(line => parseLine(line))
+                        .filter(line => line !== "")
 
-  return nonEmptyLines
+  const withSymbolsResolved = parsedLines.map(line => resolveLineSymbols(line))
+
+  return withSymbolsResolved
 }
 
 const readFile = (filePath) => {
