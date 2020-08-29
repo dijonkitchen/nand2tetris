@@ -115,7 +115,7 @@ const addLabel = (line, symbolTable) => {
 
   symbolTable[labelName] = addressCounter
 
-  return "@" + addressCounter
+  return ""
 }
 
 const resolveLabels = line => {
@@ -181,7 +181,7 @@ const parseFile = (fileData) => {
   const sanitizedLines = lines.map(line => sanitizeLine(line))
   const nonEmptyLines = sanitizedLines.filter(line => line !== "")
   const withLabelsResolved = nonEmptyLines.map(line => resolveLabels(line))
-  const parsedLines = nonEmptyLines
+  const parsedLines = withLabelsResolved
                         .map(line => parseLine(line))
                         .filter(line => line !== "")
 
